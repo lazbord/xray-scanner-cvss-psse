@@ -27,4 +27,4 @@ jobs:
         run: python test2.py
 
       - name: Run tri_red_black_list.py
-        run: python tri_res_black_list.py
+        run: python tri_red_black_list.py
