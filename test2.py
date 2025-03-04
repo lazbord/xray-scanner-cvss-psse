@@ -1,6 +1,3 @@
-from asyncore import write
-from unittest import expectedFailure
-from urllib import response
 import requests
 import time
 import math
@@ -148,7 +145,7 @@ def funcDataNIST(offset):
 
             if cvssBaseseverity != 0:
                 cve = data["vulnerabilities"][i]["cve"]["id"]
-                CVEtableUnit = { 'CVE': cve, 'CVSS': cvssMetric, 'CVSS version': cvssBaseScore }
+                CVEtableUnit = { 'CVE': cve, 'CVSS version': cvssMetric, 'CVSS': cvssBaseScore }
                 CVE_CVSS_EPSS_table.append(CVEtableUnit)
                     
 
@@ -178,8 +175,8 @@ def funcNbCVEglobal():
     return nbCVEglobal
 
 
-nbCVEglobal = funcNbCVEglobal()
-#nbCVEglobal = 6001
+#nbCVEglobal = funcNbCVEglobal()
+nbCVEglobal = 6001
 CVE_CVSS_EPSS_table = []
 GlobalBlackList = []
 offsetGlobal = [2000,0] 
@@ -191,8 +188,8 @@ incrementationDataNIST (offset = [2000,0], nbCVE = nbCVEglobal)
 print("Extracting EPSS data")
 remplissageEPSS()
 
-with open("GlobalList.csv", mode="w", newline='') as csvfileFinal:
-    headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
+with open("./CVSS_EPSS_Global_List/GlobalList.csv", mode="w", newline='') as csvfileFinal:
+    headers= ['CVE', 'CVSS', 'CVSS version', 'EPSS', 'EPSS percentile']
     writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
     writer.writeheader()
     writer.writerows(CVE_CVSS_EPSS_table)

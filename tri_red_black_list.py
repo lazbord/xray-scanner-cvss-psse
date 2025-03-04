@@ -4,14 +4,14 @@ globalBlackList = []
 globalRedList = []
 
 def makeBlackRedList():
-    with open('GlobalList.csv', newline='') as f:
+    with open('./CVSS_EPSS_Global_List/GlobalList.csv', newline='') as f:
         reader = csv.reader(f)
         data = list(reader)
 
     for i in range(1, len(data)):
         try:
-            if float(data[i][2]) > 9 and float(data[i][3]) > 0.7:
-                final = { 'CVE': data[i][0], 'CVSS version': data[i][1], 'CVSS': data[i][2],
+            if float(data[i][1]) > 9 and float(data[i][3]) > 0.7:
+                final = { 'CVE': data[i][0], 'CVSS version': data[i][2], 'CVSS': data[i][1],
                  'EPSS':data[i][3],'EPSS percentile':data[i][4] }
                 globalBlackList.append(final)
             if i == len(data):
@@ -23,8 +23,8 @@ def makeBlackRedList():
 
     for i in range(1, len(data)):
         try:
-            if float(data[i][2]) > 4 and float(data[i][3]) > 0.9:
-                final = { 'CVE': data[i][0], 'CVSS version': data[i][1], 'CVSS': data[i][2],
+            if float(data[i][1]) > 4 and float(data[i][3]) > 0.9:
+                final = { 'CVE': data[i][0], 'CVSS version': data[i][2], 'CVSS': data[i][1],
                  'EPSS':data[i][3],'EPSS percentile':data[i][4] }
                 if final not in globalBlackList :
                     globalRedList.append(final)
@@ -35,13 +35,13 @@ def makeBlackRedList():
         except:
             continue
 
-    with open("Black_List.csv", mode="w", newline='') as csvfileFinal:
+    with open("./Black_List/Black_List_Black_Zone.csv", mode="w", newline='') as csvfileFinal:
         headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
         writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
         writer.writeheader()
         writer.writerows(globalBlackList)
 
-    with open("Red_List.csv", mode="w", newline='') as csvfileFinal:
+    with open("./Black_List/Black_List_Red_Zone.csv", mode="w", newline='') as csvfileFinal:
         headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
         writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
         writer.writeheader()
