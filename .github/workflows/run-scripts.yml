@@ -30,3 +30,12 @@ jobs:
 
       - name: Run tri_red_black_list.py
         run: python tri_red_black_list.py
+
+      - name : Upload CSV
+          git config --global user.name 'github-action[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add ./CVSS_EPSS_Global_List/GlobalList.csv
+          git add ./CVSS_EPSS_Global_List/Black_Zone.csv
+          git add ./CVSS_EPSS_Global_List/Red_Zone.csv
+          git commit -m "Automated file modification"
+          git push

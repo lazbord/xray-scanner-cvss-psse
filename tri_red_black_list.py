@@ -35,13 +35,13 @@ def makeBlackRedList():
         except:
             continue
 
-    with open("./Black_List/Black_List_Black_Zone.csv", mode="w", newline='') as csvfileFinal:
+    with open("./CVSS_EPSS_Global_List/Black_Zone.csv", mode="w", newline='') as csvfileFinal:
         headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
         writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
         writer.writeheader()
         writer.writerows(globalBlackList)
 
-    with open("./Black_List/Black_List_Red_Zone.csv", mode="w", newline='') as csvfileFinal:
+    with open("./CVSS_EPSS_Global_List/Red_Zone.csv", mode="w", newline='') as csvfileFinal:
         headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
         writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
         writer.writeheader()
