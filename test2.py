@@ -175,7 +175,7 @@ def funcNbCVEglobal():
 
 
 #nbCVEglobal = funcNbCVEglobal()
-nbCVEglobal = 1000
+nbCVEglobal = 1001
 CVE_CVSS_EPSS_table = []
 GlobalBlackList = []
 offsetGlobal = [2000,0] 
