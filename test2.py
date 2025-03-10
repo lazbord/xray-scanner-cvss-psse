@@ -149,7 +149,7 @@ def funcDataNIST(offset):
                     if cve == CVE_CVSS_EPSS_table[i]["CVE"]:
                         doublond = True
 
-                if double == False:
+                if doublond == False:
                     CVEtableUnit = { 'CVE': cve, 'CVSS version': cvssMetric, 'CVSS': cvssBaseScore }
                     CVE_CVSS_EPSS_table.append(CVEtableUnit)
                     
