@@ -10,7 +10,7 @@ def makeBlackRedList():
 
     for i in range(1, len(data)):
         try:
-            if float(data[i][1]) => 9 and float(data[i][3]) => 0.7:
+            if float(data[i][1]) >= 9 and float(data[i][3]) >= 0.7:
                 final = { 'CVE': data[i][0], 'CVSS version': data[i][2], 'CVSS': data[i][1],
                  'EPSS':data[i][3],'EPSS percentile':data[i][4] }
                 globalBlackList.append(final)
@@ -23,7 +23,7 @@ def makeBlackRedList():
 
     for i in range(1, len(data)):
         try:
-            if float(data[i][1]) => 4 and float(data[i][3]) => 0.9:
+            if float(data[i][1]) >= 4 and float(data[i][3]) >= 0.9:
                 final = { 'CVE': data[i][0], 'CVSS version': data[i][2], 'CVSS': data[i][1],
                  'EPSS':data[i][3],'EPSS percentile':data[i][4] }
                 if final not in globalBlackList :
