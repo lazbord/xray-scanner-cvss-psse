@@ -142,11 +142,16 @@ def funcDataNIST(offset):
 
             cvssMetric, cvssBaseseverity, cvssBaseScore = compareMetrics(cvssDict)
                 
-
+            doublond = False
             if cvssBaseseverity != 0:
                 cve = data["vulnerabilities"][i]["cve"]["id"]
-                CVEtableUnit = { 'CVE': cve, 'CVSS version': cvssMetric, 'CVSS': cvssBaseScore }
-                CVE_CVSS_EPSS_table.append(CVEtableUnit)
+                for i in range(len(CVE_CVSS_EPSS_table)):
+                    if cve == CVE_CVSS_EPSS_table[i]["CVE"]:
+                        doublond = True
+
+                if double == False:
+                    CVEtableUnit = { 'CVE': cve, 'CVSS version': cvssMetric, 'CVSS': cvssBaseScore }
+                    CVE_CVSS_EPSS_table.append(CVEtableUnit)
                     
 
 def compareMetrics(cvssDict):
