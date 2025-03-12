@@ -25,11 +25,11 @@ jobs:
         run: |
           pip install -r requirements.txt || echo "No dependencies to install"
 
-      - name: Run test2.py
-        run: python test2.py
+      - name: Run CVE_CVSS_EPSS.py
+        run: python CVE_CVSS_EPSS.py
 
-      - name: Run tri_red_black_list.py
-        run: python tri_red_black_list.py
+      - name: Run zone_sort.py
+        run: python zone_sort.py
 
       - name : Upload CSV
         run:  |
