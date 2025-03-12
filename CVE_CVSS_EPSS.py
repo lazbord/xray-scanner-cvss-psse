@@ -146,7 +146,7 @@ def funcNbCVEglobal():
     return nbCVEglobal
 
 nbCVEglobal = funcNbCVEglobal()
-nbCVEglobal = 765211
+nbCVEglobal = 20000
 CVE_CVSS_EPSS_table = []
 offsetGlobal = [2000,0] 
 nbReq = math.ceil(nbCVEglobal/ offsetGlobal[0])
