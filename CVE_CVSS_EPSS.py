@@ -62,6 +62,7 @@ def funcDataNIST(offset):
     reponse = requeteCustom(requeteCVE)
     data=reponse.json()
     CVEtableUnit = None
+    listcve = ""
 
     for i in range(len(data["vulnerabilities"])):
         result = data["vulnerabilities"][i]["cve"]["metrics"]
