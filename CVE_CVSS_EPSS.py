@@ -38,14 +38,23 @@ def requeteCustom(requete):
     return reponse
 
 def incrementationDataNIST(offset, nbCVE):
-    nbReq = math.ceil(nbCVE / offset[0])  # Nombre total de requêtes à effectuer
-    for j in range(nbReq):
-        start_index = j * offset[0]  # Index de départ pour chaque tranche de 2000
-        if start_index + offset[0] > nbCVE:
-            offset[0] = nbCVE - start_index  # Ajuster le nombre de résultats pour la dernière requête si nécessaire
-        print(f"Request n° {j+1} of {nbReq} (from {start_index} to {start_index + offset[0] - 1})", end=' ')
-        offset[1] = start_index  # Mettre à jour l'index de départ
-        funcDataNIST(offset)
+    i = 0
+    j = 1
+    nbReq = math.ceil(nbCVE / offset[0])
+    while i < nbCVE:
+        if i + offset[0] < nbCVE:
+            offset[1] = i
+            print("Request n°", j, "of", str(nbReq), end='')
+            funcDataNIST(offset)
+            j = j + 1
+            i = i + offset[0]
+        else:
+            offset[0] = nbCVE - i  # Nombre de résultats que l'on veut pour la dernière requête
+            offset[1] = 1  # Index final
+            print("Request n°", j, "of", str(nbReq), end='')
+            funcDataNIST(offset)
+            j = j + 1
+            i = i + offset[0]
 
 def funcDataNIST(offset):
     start = time.time()
@@ -88,17 +97,43 @@ def funcNbCVEglobal():
     nbCVEglobal = data["totalResults"]
     return nbCVEglobal
 
+def zoneSort():
+    BlackZone = []
+    RedZone = []
 
-nbCVEglobal = funcNbCVEglobal()
+    for i in range(len(CVE_CVSS_EPSS_table)):
+        if float(CVE_CVSS_EPSS_table[i]['CVSS']) >= 9 and float(CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.7:
+            BlackZone.append(CVE_CVSS_EPSS_table[i])
+
+    for i in range(len(CVE_CVSS_EPSS_table)):
+        if float(CVE_CVSS_EPSS_table[i]['CVSS']) >= 4 and (CVE_CVSS_EPSS_table[i]['CVSS']) < 9 and float(CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.9:
+            RedZone.append(CVE_CVSS_EPSS_table[i])
+
+    BlackZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
+    RedZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
+
+    unique_blackzone = {entry['CVE']: entry for entry in BlackZone}.values()
+    unique_redzone = {entry['CVE']: entry for entry in RedZone}.values()
+
+
+    with open("./CVSS_EPSS_Global_List/Black_Zone.csv", mode="w", newline='') as csvfileFinal:
+        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
+        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(unique_blackzone)
+
+    with open("./CVSS_EPSS_Global_List/Red_Zone.csv", mode="w", newline='') as csvfileFinal:
+        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
+        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(unique_redzone)
+
+#nbCVEglobal = funcNbCVEglobal()
+nbCVEglobal = 10000
 CVE_CVSS_EPSS_table = []
 CVE_CVSS_table = []
 offsetGlobal = [2000,0] 
 nbReq = math.ceil(nbCVEglobal/ offsetGlobal[0])
 
 incrementationDataNIST(offset = [2000,0], nbCVE = nbCVEglobal)
-
-with open("./CVSS_EPSS_Global_List/Global_List.csv", mode="w", newline='') as csvfileFinal:
-    headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
-    writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
-    writer.writeheader()
-    writer.writerows(CVE_CVSS_EPSS_table)
+zoneSort()
