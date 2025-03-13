@@ -28,9 +28,6 @@ jobs:
       - name: Run CVE_CVSS_EPSS.py
         run: python CVE_CVSS_EPSS.py
 
-      - name: Run zone_sort.py
-        run: python zone_sort.py
-
       - name : Upload CSV
         run:  |
           git config --global user.name 'github-action[bot]'
