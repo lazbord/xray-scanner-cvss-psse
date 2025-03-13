@@ -128,8 +128,7 @@ def zoneSort():
         writer.writeheader()
         writer.writerows(unique_redzone)
 
-#nbCVEglobal = funcNbCVEglobal()
-nbCVEglobal = 10000
+nbCVEglobal = funcNbCVEglobal()
 CVE_CVSS_EPSS_table = []
 CVE_CVSS_table = []
 offsetGlobal = [2000,0] 
