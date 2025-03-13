@@ -98,7 +98,7 @@ nbReq = math.ceil(nbCVEglobal/ offsetGlobal[0])
 incrementationDataNIST(offset = [2000,0], nbCVE = nbCVEglobal)
 
 with open("./CVSS_EPSS_Global_List/Global_List.csv", mode="w", newline='') as csvfileFinal:
-    headers= ['CVE', 'CVSS version', 'CVSS']
+    headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
     writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
     writer.writeheader()
     writer.writerows(CVE_CVSS_EPSS_table)
