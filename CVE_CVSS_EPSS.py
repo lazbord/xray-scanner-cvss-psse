@@ -57,7 +57,7 @@ def incrementationDataNIST(offset, nbCVE):
             i = i + offset[0]
 
 def funcDataNIST(offset):
-
+    start = time.time()
     requeteCVE = 'https://services.nvd.nist.gov/rest/json/cves/2.0/?resultsPerPage=' + str(offset[0]) + '&startIndex=' + str(offset[1])
     reponse = requeteCustom(requeteCVE)
     data=reponse.json()
@@ -80,6 +80,15 @@ def funcDataNIST(offset):
 
     requeteEPSS(listcve)
     listcve = ""
+
+    end = time.time()
+
+    totaltime = (end - start)
+    if totaltime < 6.1 :
+        print(Fore.GREEN + r" Response time too short ",end='')
+        print(Fore.WHITE, end='')
+        time.sleep(6.1-totaltime)
+    print("Total time elapsed", round((end - start),2),"s")
 
 def funcNbCVEglobal():
     requete = "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=1&startIndex=0"
