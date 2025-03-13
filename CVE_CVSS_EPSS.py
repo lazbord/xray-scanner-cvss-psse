@@ -19,37 +19,6 @@ def requeteEPSS(CVE):
         
     CVE_CVSS_table.clear()
 
-
-def zoneSort():
-    BlackZone = []
-    RedZone = []
-
-    for i in range(len(CVE_CVSS_EPSS_table)):
-        if (CVE_CVSS_EPSS_table[i][2]) >= 9 and (CVE_CVSS_EPSS_table[i][3]) >= 0.7:
-            final = { 'CVE': CVE_CVSS_EPSS_table[i][0], 'CVSS version': CVE_CVSS_EPSS_table[i][1], 'CVSS': CVE_CVSS_EPSS_table[i][2],
-                'EPSS':CVE_CVSS_EPSS_table[i][3],'EPSS percentile':CVE_CVSS_EPSS_table[i][4] }
-            BlackZone.append(final)
-
-    for i in range(1, len(CVE_CVSS_EPSS_table)):
-        if float(CVE_CVSS_EPSS_table[i][2]) >= 4 and float(CVE_CVSS_EPSS_table[i][3]) >= 0.9:
-            final = { 'CVE': CVE_CVSS_EPSS_table[i][0], 'CVSS version': CVE_CVSS_EPSS_table[i][1], 'CVSS': CVE_CVSS_EPSS_table[i][2],
-                'EPSS':CVE_CVSS_EPSS_table[i][3],'EPSS percentile':CVE_CVSS_EPSS_table[i][4] }
-            if final not in BlackZone :
-                RedZone.append(final)
-
-    with open("./CVSS_EPSS_Global_List/Black_Zone.csv", mode="w", newline='') as csvfileFinal:
-        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
-        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
-        writer.writeheader()
-        writer.writerows(BlackZone)
-
-    with open("./CVSS_EPSS_Global_List/Red_Zone.csv", mode="w", newline='') as csvfileFinal:
-        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
-        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
-        writer.writeheader()
-        writer.writerows(RedZone)
-
-
 def requeteCustom(requete):
     while True:
         try:
@@ -156,8 +125,32 @@ def funcNbCVEglobal():
     nbCVEglobal = data["totalResults"]
     return nbCVEglobal
 
+def zoneSort():
+    BlackZone = []
+    RedZone = []
+
+    for i in range(len(CVE_CVSS_EPSS_table)):
+        if float(CVE_CVSS_EPSS_table[i]['CVSS']) >= 9 and float(CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.7:
+            BlackZone.append(CVE_CVSS_EPSS_table[i])
+
+    for i in range(len(CVE_CVSS_EPSS_table)):
+        if float(CVE_CVSS_EPSS_table[i]['CVSS']) >= 4 and float(CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.9:
+            if CVE_CVSS_EPSS_table[i] not in BlackZone :
+                RedZone.append(CVE_CVSS_EPSS_table[i])
+
+    with open("./CVSS_EPSS_Global_List/Black_Zone.csv", mode="w", newline='') as csvfileFinal:
+        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
+        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(BlackZone)
+
+    with open("./CVSS_EPSS_Global_List/Red_Zone.csv", mode="w", newline='') as csvfileFinal:
+        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
+        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(RedZone)
+
 nbCVEglobal = funcNbCVEglobal()
-nbCVEglobal = 4001
 CVE_CVSS_EPSS_table = []
 CVE_CVSS_table = []
 offsetGlobal = [2000,0] 
