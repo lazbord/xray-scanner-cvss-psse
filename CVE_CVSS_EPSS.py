@@ -5,27 +5,31 @@ import statistics
 import csv
 from colorama import Fore
 
+def requeteEPSS(CVE):
+    response = requests.get("https://api.first.org/data/v1/epss?cve=" + CVE)
+    donneesGlobales = response.json()
+    EPSStable = donneesGlobales.get("data")
+
+    for i in range(len(CVE_CVSS_table)):
+        for j in range(len(EPSStable)):
+            if CVE_CVSS_table[i]['CVE'] == EPSStable[j]['cve']:
+                CVE_CVSS_EPSS_table.append({ 'CVE': CVE_CVSS_table[i]['CVE'], 'CVSS version': CVE_CVSS_table[i]['CVSS version'], 'CVSS': CVE_CVSS_table[i]['CVSS'], 
+                    "EPSS": EPSStable[j]['epss'],"EPSS percentile" : EPSStable[j]['percentile']})
+                break
+        
+    CVE_CVSS_table.clear()
 
 def requeteCustom(requete):
     while True:
         try:
-            start = time.time()
             reponse = requests.get(requete, timeout=3600)
-            end = time.time()
-            reponseTime = end - start
             if reponse.status_code > 399:
                     print(Fore.RED + r" Request failed ! Waiting 10 seconds due to NIST API restriction")
                     print(Fore.WHITE, end='')
                     time.sleep(10)
                     continue
-            if reponseTime < 6.1:
-                print("TOO FAST")
-                time.sleep(6.1 - reponseTime)
-                reponseTime = 6.1
-                break
             else :
                 break
-
         except:
             print(Fore.RED + r" Request failed ! Waiting for connection...")
             print(Fore.WHITE, end='')
@@ -63,12 +67,18 @@ def funcDataNIST(offset):
         result = data["vulnerabilities"][i]["cve"]["metrics"]
         paramCVSS = len(result)
         if paramCVSS != 0:
-            cvssDict = {}
             for metrics in result:
                 cve = data["vulnerabilities"][i]["cve"]["id"]
+                listcve += str(cve + ",")
                 cvss = result[metrics][0]["cvssData"]["baseScore"]
                 CVEtableUnit = { 'CVE': cve, 'CVSS version': metrics, 'CVSS': cvss }
                 CVE_CVSS_table.append(CVEtableUnit)
+                if len(CVE_CVSS_table) == 100:
+                    requeteEPSS(listcve)
+                    listcve = ""
+
+    requeteEPSS(listcve)
+    listcve = ""
 
 def funcNbCVEglobal():
     requete = "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=1&startIndex=0"
@@ -78,7 +88,7 @@ def funcNbCVEglobal():
     return nbCVEglobal
 
 
-nbCVEglobal = funcNbCVEglobal()
+#nbCVEglobal = funcNbCVEglobal()
 nbCVEglobal = 10000
 CVE_CVSS_EPSS_table = []
 CVE_CVSS_table = []
@@ -91,4 +101,4 @@ with open("./CVSS_EPSS_Global_List/Global_List.csv", mode="w", newline='') as cs
     headers= ['CVE', 'CVSS version', 'CVSS']
     writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
     writer.writeheader()
-    writer.writerows(CVE_CVSS_table)
+    writer.writerows(CVE_CVSS_EPSS_table)
