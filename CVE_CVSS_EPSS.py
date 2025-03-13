@@ -38,23 +38,14 @@ def requeteCustom(requete):
     return reponse
 
 def incrementationDataNIST(offset, nbCVE):
-    i = 0
-    j = 1
-    nbReq = math.ceil(nbCVE / offset[0])
-    while i < nbCVE:
-        if i + offset[0] < nbCVE:
-            offset[1] = i
-            print("Request n°", j, "of", str(nbReq), end='')
-            funcDataNIST(offset)
-            j = j + 1
-            i = i + offset[0]
-        else:
-            offset[0] = nbCVE - i  # Nombre de résultats que l'on veut pour la dernière requête
-            offset[1] = 1  # Index final
-            print("Request n°", j, "of", str(nbReq), end='')
-            funcDataNIST(offset)
-            j = j + 1
-            i = i + offset[0]
+    nbReq = math.ceil(nbCVE / offset[0])  # Nombre total de requêtes à effectuer
+    for j in range(nbReq):
+        start_index = j * offset[0]  # Index de départ pour chaque tranche de 2000
+        if start_index + offset[0] > nbCVE:
+            offset[0] = nbCVE - start_index  # Ajuster le nombre de résultats pour la dernière requête si nécessaire
+        print(f"Request n° {j+1} of {nbReq} (from {start_index} to {start_index + offset[0] - 1})", end=' ')
+        offset[1] = start_index  # Mettre à jour l'index de départ
+        funcDataNIST(offset)
 
 def funcDataNIST(offset):
     start = time.time()
