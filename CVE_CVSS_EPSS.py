@@ -5,29 +5,24 @@ import statistics
 import csv
 from colorama import Fore
 
-def requeteEPSS(CVE):
-    response = requests.get("https://api.first.org/data/v1/epss?cve=" + CVE)
-    donneesGlobales = response.json()
-    EPSStable = donneesGlobales.get("data")
-
-    for i in range(len(CVE_CVSS_table)):
-        for j in range(len(EPSStable)):
-            if CVE_CVSS_table[i]['CVE'] == EPSStable[j]['cve']:
-                CVE_CVSS_EPSS_table.append({ 'CVE': CVE_CVSS_table[i]['CVE'], 'CVSS version': CVE_CVSS_table[i]['CVSS version'], 'CVSS': CVE_CVSS_table[i]['CVSS'], 
-                    "EPSS": EPSStable[j]['epss'],"EPSS percentile" : EPSStable[j]['percentile']})
-                break
-        
-    CVE_CVSS_table.clear()
 
 def requeteCustom(requete):
     while True:
         try:
+            start = time.time()
             reponse = requests.get(requete, timeout=3600)
+            end = time.time()
+            reponseTime = end - start
             if reponse.status_code > 399:
                     print(Fore.RED + r" Request failed ! Waiting 10 seconds due to NIST API restriction")
                     print(Fore.WHITE, end='')
                     time.sleep(10)
                     continue
+            if reponseTime < 6.1:
+                print("TOO FAST")
+                time.sleep(6.1 - reponseTime)
+                reponseTime = 6.1
+                break
             else :
                 break
 
@@ -58,8 +53,7 @@ def incrementationDataNIST(offset, nbCVE):
             i = i + offset[0]
 
 def funcDataNIST(offset):
-    start = time.time()
-    listcve = ""
+
     requeteCVE = 'https://services.nvd.nist.gov/rest/json/cves/2.0/?resultsPerPage=' + str(offset[0]) + '&startIndex=' + str(offset[1])
     reponse = requeteCustom(requeteCVE)
     data=reponse.json()
@@ -71,52 +65,10 @@ def funcDataNIST(offset):
         if paramCVSS != 0:
             cvssDict = {}
             for metrics in result:
-                cvssDict[metrics] = (result[metrics][0]["cvssData"]["baseScore"])
-
-            cvssMetric, cvssBaseScore = compareMetrics(cvssDict)
-                
-            if cvssBaseScore != 0:
                 cve = data["vulnerabilities"][i]["cve"]["id"]
-                listcve += str(cve + ",")
-                CVEtableUnit = { 'CVE': cve, 'CVSS version': cvssMetric, 'CVSS': cvssBaseScore }
+                cvss = result[metrics][0]["cvssData"]["baseScore"]
+                CVEtableUnit = { 'CVE': cve, 'CVSS version': metrics, 'CVSS': cvss }
                 CVE_CVSS_table.append(CVEtableUnit)
-                if len(CVE_CVSS_table) == 100:
-                    requeteEPSS(listcve)
-                    listcve = ""
-
-    requeteEPSS(listcve)
-    listcve = ""
-
-    end = time.time()
-
-    totaltime = (end - start)
-    if totaltime < 6.1 :
-        print(Fore.GREEN + r" Response time too short ",end='')
-        print(Fore.WHITE, end='')
-        time.sleep(6.1-totaltime)
-    print("Total time elapsed", round((end - start),2),"s")
-
-def compareMetrics(cvssDict):
-    metric_order = ["cvssMetricV31", "cvssMetricV30", "cvssMetricV2"]
-
-    selected_metric = None
-    selected_score = 0
-
-    for metric in metric_order:
-        if metric in cvssDict:
-            score = cvssDict[metric]
-
-            if score < 4:
-                continue
-
-            if selected_metric is None or score > selected_score:
-                selected_metric = metric
-                selected_score = score
-
-    if selected_metric is None:
-        return 0,0
-    
-    return selected_metric, selected_score
 
 def funcNbCVEglobal():
     requete = "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=1&startIndex=0"
@@ -125,30 +77,6 @@ def funcNbCVEglobal():
     nbCVEglobal = data["totalResults"]
     return nbCVEglobal
 
-def zoneSort():
-    BlackZone = []
-    RedZone = []
-
-    for i in range(len(CVE_CVSS_EPSS_table)):
-        if float(CVE_CVSS_EPSS_table[i]['CVSS']) >= 9 and float(CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.7:
-            BlackZone.append(CVE_CVSS_EPSS_table[i])
-
-    for i in range(len(CVE_CVSS_EPSS_table)):
-        if float(CVE_CVSS_EPSS_table[i]['CVSS']) >= 4 and float(CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.9:
-            if CVE_CVSS_EPSS_table[i] not in BlackZone :
-                RedZone.append(CVE_CVSS_EPSS_table[i])
-
-    with open("./CVSS_EPSS_Global_List/Black_Zone.csv", mode="w", newline='') as csvfileFinal:
-        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
-        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
-        writer.writeheader()
-        writer.writerows(BlackZone)
-
-    with open("./CVSS_EPSS_Global_List/Red_Zone.csv", mode="w", newline='') as csvfileFinal:
-        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
-        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
-        writer.writeheader()
-        writer.writerows(RedZone)
 
 nbCVEglobal = funcNbCVEglobal()
 CVE_CVSS_EPSS_table = []
@@ -159,9 +87,7 @@ nbReq = math.ceil(nbCVEglobal/ offsetGlobal[0])
 incrementationDataNIST(offset = [2000,0], nbCVE = nbCVEglobal)
 
 with open("./CVSS_EPSS_Global_List/Global_List.csv", mode="w", newline='') as csvfileFinal:
-    headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
+    headers= ['CVE', 'CVSS version', 'CVSS']
     writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
     writer.writeheader()
-    writer.writerows(CVE_CVSS_EPSS_table)
-
-zoneSort()
+    writer.writerows(CVE_CVSS_table)
