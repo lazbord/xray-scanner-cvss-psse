@@ -1,7 +1,6 @@
 import requests
 import time
 import math
-import statistics
 import csv
 from colorama import Fore
 
@@ -88,7 +87,7 @@ def funcDataNIST(offset):
         print(Fore.GREEN + r" Response time too short ",end='')
         print(Fore.WHITE, end='')
         time.sleep(6.1-totaltime)
-    print("Total time elapsed", round((end - start),2),"s")
+    print(": Total time elapsed", round((end - start),2),"s")
 
 def funcNbCVEglobal():
     requete = "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=1&startIndex=0"
@@ -98,16 +97,18 @@ def funcNbCVEglobal():
     return nbCVEglobal
 
 def zoneSort():
+    
+    cleaned_CVE_CVSS_EPSS_table = metricsSort(CVE_CVSS_EPSS_table)
     BlackZone = []
     RedZone = []
 
-    for i in range(len(CVE_CVSS_EPSS_table)):
-        if float(CVE_CVSS_EPSS_table[i]['CVSS']) >= 9 and float(CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.7:
-            BlackZone.append(CVE_CVSS_EPSS_table[i])
+    for i in range(len(cleaned_CVE_CVSS_EPSS_table)):
+        if float(cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) >= 9 and float(cleaned_CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.7:
+            BlackZone.append(cleaned_CVE_CVSS_EPSS_table[i])
 
-    for i in range(len(CVE_CVSS_EPSS_table)):
-        if float(CVE_CVSS_EPSS_table[i]['CVSS']) >= 4 and (CVE_CVSS_EPSS_table[i]['CVSS']) < 9 and float(CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.9:
-            RedZone.append(CVE_CVSS_EPSS_table[i])
+    for i in range(len(cleaned_CVE_CVSS_EPSS_table)):
+        if float(cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) >= 4 and (cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) < 9 and float(cleaned_CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.9:
+            RedZone.append(cleaned_CVE_CVSS_EPSS_table[i])
 
     BlackZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
     RedZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
@@ -128,11 +129,39 @@ def zoneSort():
         writer.writeheader()
         writer.writerows(unique_redzone)
 
-nbCVEglobal = funcNbCVEglobal()
+def metricsSort(CVE_CVSS_EPSS_table):
+        
+    cvss_priority = {
+        "cvssMetricV31": 3,
+        "cvssMetricV30": 2,
+        "cvssMetricV2": 1
+    }
+
+    cve_dict = {}
+
+    for cve, metric, cvss, epss, epss_pct in CVE_CVSS_EPSS_table:
+        if cvss < 4:
+            continue  
+
+        if cve not in cve_dict or cvss_priority[metric] > cvss_priority[cve_dict[cve][0]]:
+            cve_dict[cve] = (metric, cvss, epss, epss_pct)
+
+    cleaned_CVE_CVSS_EPSS_table = [(cve, *values) for cve, values in cve_dict.items()]
+    return cleaned_CVE_CVSS_EPSS_table
+
+
+nbCVEglobal = 5000
 CVE_CVSS_EPSS_table = []
 CVE_CVSS_table = []
 offsetGlobal = [2000,0] 
 nbReq = math.ceil(nbCVEglobal/ offsetGlobal[0])
 
 incrementationDataNIST(offset = [2000,0], nbCVE = nbCVEglobal)
+
+with open("./CVSS_EPSS_Global_List/Global_List.csv", mode="w", newline='') as csvfileFinal:
+        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
+        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(CVE_CVSS_EPSS_table)
+
 zoneSort()
