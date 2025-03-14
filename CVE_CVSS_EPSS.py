@@ -139,14 +139,22 @@ def metricsSort(CVE_CVSS_EPSS_table):
 
     cve_dict = {}
 
-    for cve, metric, cvss, epss, epss_pct in CVE_CVSS_EPSS_table:
+    for entry in CVE_CVSS_EPSS_table:
+        cve = entry['CVE']
+        metric = entry['CVSS version']
+        cvss = float(entry['CVSS'])  # ✅ Convertir en float
+        epss = entry["EPSS"]
+        epss_pct = entry["EPSS percentile"]
+
         if cvss < 4:
             continue  
 
-        if cve not in cve_dict or cvss_priority[metric] > cvss_priority[cve_dict[cve][0]]:
+        if cve not in cve_dict or cvss_priority.get(metric, 0) > cvss_priority.get(cve_dict[cve][0], 0):
             cve_dict[cve] = (metric, cvss, epss, epss_pct)
 
-    cleaned_CVE_CVSS_EPSS_table = [(cve, *values) for cve, values in cve_dict.items()]
+    cleaned_CVE_CVSS_EPSS_table = [{"CVE": cve, "CVSS version": values[0], "CVSS": values[1], 
+                                    "EPSS": values[2], "EPSS percentile": values[3]} 
+                                   for cve, values in cve_dict.items()]
     return cleaned_CVE_CVSS_EPSS_table
 
 
