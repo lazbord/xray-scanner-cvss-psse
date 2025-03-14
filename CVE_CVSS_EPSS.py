@@ -158,7 +158,7 @@ def metricsSort(CVE_CVSS_EPSS_table):
     return cleaned_CVE_CVSS_EPSS_table
 
 
-nbCVEglobal = 5000
+nbCVEglobal = funcNbCVEglobal()
 CVE_CVSS_EPSS_table = []
 CVE_CVSS_table = []
 offsetGlobal = [2000,0] 
