@@ -112,24 +112,18 @@ def zoneSort():
         if float(cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) >= 4 and (cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) < 9 and float(cleaned_CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.9:
             RedZone.append(cleaned_CVE_CVSS_EPSS_table[i])
 
-    BlackZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
-    RedZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
-
-    unique_blackzone = {entry['CVE']: entry for entry in BlackZone}.values()
-    unique_redzone = {entry['CVE']: entry for entry in RedZone}.values()
-
 
     with open("./CVSS_EPSS_Global_List/Black_Zone.csv", mode="w", newline='') as csvfileFinal:
         headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
         writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
         writer.writeheader()
-        writer.writerows(unique_blackzone)
+        writer.writerows(BlackZone)
 
     with open("./CVSS_EPSS_Global_List/Red_Zone.csv", mode="w", newline='') as csvfileFinal:
         headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
         writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
         writer.writeheader()
-        writer.writerows(unique_redzone)
+        writer.writerows(RedZone)
 
 def metricsSort(CVE_CVSS_EPSS_table):
         
@@ -144,7 +138,7 @@ def metricsSort(CVE_CVSS_EPSS_table):
     for entry in CVE_CVSS_EPSS_table:
         cve = entry['CVE']
         metric = entry['CVSS version']
-        cvss = float(entry['CVSS'])  # ✅ Convertir en float
+        cvss = float(entry['CVSS'])
         epss = entry["EPSS"]
         epss_pct = entry["EPSS percentile"]
 
