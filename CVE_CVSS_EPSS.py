@@ -4,7 +4,7 @@ import math
 import csv
 from colorama import Fore
 
-#push3
+#24.03.2025
 
 def requeteEPSS(CVE):
     response = requests.get("https://api.first.org/data/v1/epss?cve=" + CVE)
