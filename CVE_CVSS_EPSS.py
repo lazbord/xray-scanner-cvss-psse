@@ -101,34 +101,41 @@ def funcNbCVEglobal():
 def zoneSort():
     
     cleaned_CVE_CVSS_EPSS_table = metricsSort(CVE_CVSS_EPSS_table)
-    BlackZone = []
-    RedZone = []
+    BlackList = []
+    #BlackZone = []
+    #RedZone = []
 
     for i in range(len(cleaned_CVE_CVSS_EPSS_table)):
-        if float(cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) >= 9 and float(cleaned_CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.7:
-            BlackZone.append(cleaned_CVE_CVSS_EPSS_table[i])
+        if float(cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) >= 4 and float(cleaned_CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.7:
+            BlackList.append(cleaned_CVE_CVSS_EPSS_table[i])
 
-    for i in range(len(cleaned_CVE_CVSS_EPSS_table)):
-        if float(cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) >= 4 and (cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) < 9 and float(cleaned_CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.9:
-            RedZone.append(cleaned_CVE_CVSS_EPSS_table[i])
+    #for i in range(len(cleaned_CVE_CVSS_EPSS_table)):
+    #    if float(cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) >= 9 and float(cleaned_CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.7:
+    #        BlackZone.append(cleaned_CVE_CVSS_EPSS_table[i])
 
-    BlackZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
-    RedZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
- 
-    unique_blackzone = {entry['CVE']: entry for entry in BlackZone}.values()
-    unique_redzone = {entry['CVE']: entry for entry in RedZone}.values()
+    #for i in range(len(cleaned_CVE_CVSS_EPSS_table)):
+    #    if float(cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) >= 4 and (cleaned_CVE_CVSS_EPSS_table[i]['CVSS']) < 9 and float(cleaned_CVE_CVSS_EPSS_table[i]['EPSS']) >= 0.9:
+    #        RedZone.append(cleaned_CVE_CVSS_EPSS_table[i])
 
-    with open("./CVSS_EPSS_Global_List/Black_Zone.csv", mode="w", newline='') as csvfileFinal:
+    BlackList.sort(key=lambda x: str(x['CVSS version']), reverse=True)
+    #BlackZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
+    #RedZone.sort(key=lambda x: str(x['CVSS version']), reverse=True)
+    
+    unique_blacklist = {entry['CVE']: entry for entry in BlackList}.values()
+    #unique_blackzone = {entry['CVE']: entry for entry in BlackZone}.values()
+    #unique_redzone = {entry['CVE']: entry for entry in RedZone}.values()
+
+    with open("./CVSS_EPSS_Global_List/Black_List.csv", mode="w", newline='') as csvfileFinal:
         headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
         writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
         writer.writeheader()
-        writer.writerows(unique_blackzone)
+        writer.writerows(unique_blacklist)
 
-    with open("./CVSS_EPSS_Global_List/Red_Zone.csv", mode="w", newline='') as csvfileFinal:
-        headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
-        writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
-        writer.writeheader()
-        writer.writerows(unique_redzone)
+    #with open("./CVSS_EPSS_Global_List/Red_Zone.csv", mode="w", newline='') as csvfileFinal:
+    #    headers= ['CVE', 'CVSS version', 'CVSS', 'EPSS', 'EPSS percentile']
+    #    writer = csv.DictWriter(csvfileFinal, fieldnames=headers)
+    #    writer.writeheader()
+    #    writer.writerows(unique_redzone)
 
 def metricsSort(CVE_CVSS_EPSS_table):
         
